@@ -1,0 +1,17 @@
+\#*
+*~
+*.o
+*.a
+*.fas
+*.fasb
+*.fasl
+
+.bindings
+
+# win32
+*.manifest
+*.lib
+*.exp
+*.obj
+*.ilk
+*.pdb
