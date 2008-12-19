@@ -47,13 +47,16 @@
   (oct-1d:insert addr val (symtable-store symtable)))
 
 (defun name (symtable addr)
-  (oct-1d:resolve addr (symtable-store symtable)))
+  (oct-1d:tree-left addr (symtable-store symtable)))
 
 (defun addr (symtable name)
   (gethash name (symtable-name# symtable)))
 
 (defun next-name (name symtable)
-  (oct-1d:resolve-next (addr symtable name) (symtable-store symtable)))
+  (oct-1d:tree-right (addr symtable name) (symtable-store symtable)))
+
+(defun next-addr (addr symtable)
+  (oct-1d:tree-right addr (symtable-store symtable)))
 
 (defun load-system-map (filename &key (name :kernel) (nickname :k) reuse-package)
   (when (and (or (find-package name) (find-package nickname)) (null reuse-package))
