@@ -4,4 +4,5 @@
   (:export
    #:make-symtable #:symtable
    #:add #:name #:addr #:next-name #:next-addr
+   #:do-table-symbols
    #:load-system-map))

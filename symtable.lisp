@@ -84,3 +84,8 @@
             (export sym package)
             (add addr sym table)))
     table))
+
+(defmacro do-table-symbols ((symbol address) table &body body)
+  "Execute BODY with SYMBOL and ADDRESS bound, in turn, to each entry in TABLE."
+  `(iter (for (,symbol ,address) in-hashtable (symtable-name# ,table))
+         ,@body))
