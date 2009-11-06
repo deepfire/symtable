@@ -42,15 +42,38 @@
 		  :store (oct-1d:make-tree :start start :length len)))
 
 (defun add (addr val symtable)
-  (setf (gethash val (symtable-name# symtable)) addr)
-  (incf (symtable-nsyms symtable))
+  (let ((ht (symtable-name# symtable)))
+    (multiple-value-bind (pre hasp) (gethash val ht)
+      (cond ((not hasp)
+             (setf (gethash val ht) addr)
+             (incf (symtable-nsyms symtable)))
+            ((consp pre)
+             (push addr (gethash val ht)))
+            (t
+             (setf (gethash val ht) (list addr pre))))))
   (oct-1d:insert addr val (symtable-store symtable)))
 
 (defun name (symtable addr)
   (oct-1d:tree-left addr (symtable-store symtable)))
 
-(defun addr (symtable name)
+(defun %addr (symtable name)
   (gethash name (symtable-name# symtable)))
+
+(defun addr* (symtable name)
+  (let ((sym (%addr symtable name)))
+    (if (consp sym)
+        sym
+        (list sym))))
+
+(defun addr (symtable name)
+  (let ((sym (%addr symtable name)))
+    (if (consp sym)
+        (car sym)
+        sym)))
+
+(defun next-name* (name symtable)
+  (mapcar (rcurry #'oct-1d:tree-right (symtable-store symtable))
+          (addr* symtable name)))
 
 (defun next-name (name symtable)
   (oct-1d:tree-right (addr symtable name) (symtable-store symtable)))
@@ -87,5 +110,7 @@
 
 (defmacro do-table-symbols ((symbol address) table &body body)
   "Execute BODY with SYMBOL and ADDRESS bound, in turn, to each entry in TABLE."
-  `(iter (for (,symbol ,address) in-hashtable (symtable-name# ,table))
-         ,@body))
+  (with-gensyms (addrs)
+    `(iter (for (,symbol ,addrs) in-hashtable (symtable-name# ,table))
+           (let ((,address (if (consp ,addrs (car ,addrs) ,addrs))))
+             ,@body))))
