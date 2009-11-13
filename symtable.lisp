@@ -61,7 +61,7 @@
 
 (defun addr* (symtable name)
   (let ((sym (%addr symtable name)))
-    (if (consp sym)
+    (if (listp sym)
         sym
         (list sym))))
 
