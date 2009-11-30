@@ -81,7 +81,7 @@
 (defun next-addr (addr symtable)
   (oct-1d:tree-right addr (symtable-store symtable)))
 
-(defun load-system-map (filename &key (name :kernel) (nickname :k) reuse-package)
+(defun load-system-map (filename &key (name :kernel) (nickname :k) reuse-package imbue-symbols)
   (when (and (or (find-package name) (find-package nickname)) (null reuse-package))
     (error "Can't make a symbol table named ~S: similarly-named package already exists." name))
   (let* ((*read-base* 16) (syms nil)
@@ -105,6 +105,8 @@
     (iter (for (addr . sym) in syms)
           (when (symbolp sym)
             (export sym package)
+            (when imbue-symbols
+              (setf (symbol-value sym) sym))
             (add addr sym table)))
     table))
 
