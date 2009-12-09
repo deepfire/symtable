@@ -1,9 +1,4 @@
-;;; -*- Mode: Lisp -*-
-
-(defpackage :symtable.system
-  (:use :cl :asdf))
-
-(in-package :symtable.system)
+;;; -*- Mode: Lisp; indent-tabs-mode: nil -*-
 
 (defsystem :symtable
   :depends-on (alexandria iterate semi-precious)
