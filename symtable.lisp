@@ -93,7 +93,7 @@
 		      (make-package name :nicknames (list nickname))))
 	 (minimax (with-open-file (stream filename)
 		    (iter (for addr = (read stream nil nil nil))
-			  (for type = (read stream nil nil nil))
+			  (read stream nil nil nil) ;; skip type
 			  (for sym = (let ((*package* package))
 				       (read stream nil nil nil)))
 			  (while (and addr sym))
