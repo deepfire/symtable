@@ -39,7 +39,7 @@
 		  :extent-start start
 		  :extent-len len
 		  :name# (make-hash-table)
-		  :store (oct-1d:make-tree :start start :length len)))
+		  :store (intree:make-tree :start start :length len)))
 
 (defun add (addr val symtable)
   (let ((ht (symtable-name# symtable)))
@@ -51,10 +51,10 @@
              (push addr (gethash val ht)))
             (t
              (setf (gethash val ht) (list addr pre))))))
-  (oct-1d:insert addr val (symtable-store symtable)))
+  (intree:insert addr val (symtable-store symtable)))
 
 (defun name (symtable addr)
-  (oct-1d:tree-left addr (symtable-store symtable)))
+  (intree:tree-left addr (symtable-store symtable)))
 
 (defun %addr (symtable name)
   (gethash name (symtable-name# symtable)))
@@ -72,14 +72,14 @@
         sym)))
 
 (defun next-name* (name symtable)
-  (mapcar (rcurry #'oct-1d:tree-right (symtable-store symtable))
+  (mapcar (rcurry #'intree:tree-right (symtable-store symtable))
           (addr* symtable name)))
 
 (defun next-name (name symtable)
-  (oct-1d:tree-right (addr symtable name) (symtable-store symtable)))
+  (intree:tree-right (addr symtable name) (symtable-store symtable)))
 
 (defun next-addr (addr symtable)
-  (oct-1d:tree-right addr (symtable-store symtable)))
+  (intree:tree-right addr (symtable-store symtable)))
 
 (defun load-system-map (filename &key (name :kernel) (nickname :k) reuse-package imbue-symbols)
   (when (and (or (find-package name) (find-package nickname)) (null reuse-package))
