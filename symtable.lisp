@@ -39,7 +39,9 @@
 		  :extent-start start
 		  :extent-len len
 		  :name# (make-hash-table)
-		  :store (intree:make-tree :start start :length len)))
+		  :store (make-instance 'cl-containers:red-black-tree :key #'car)
+                  #+nil
+                  (intree:make-tree :start start :length len)))
 
 (defun add (addr val symtable)
   (let ((ht (symtable-name# symtable)))
@@ -51,10 +53,14 @@
              (push addr (gethash val ht)))
             (t
              (setf (gethash val ht) (list addr pre))))))
-  (intree:insert addr val (symtable-store symtable)))
+  (cl-containers:insert-item (symtable-store symtable) (cons addr val)))
 
-(defun name (symtable addr)
-  (intree:tree-left addr (symtable-store symtable)))
+(defun name (symtable addr &aux (store (symtable-store symtable)))
+  (let* ((succ (cl-containers:find-successor-node store (cons (1+ addr) nil)))
+         (pred (if succ
+                   (cl-containers:predecessor store succ)
+                   (cl-containers::last-node store))))
+    (car (cl-containers:element pred))))
 
 (defun %addr (symtable name)
   (gethash name (symtable-name# symtable)))
@@ -72,14 +78,16 @@
         sym)))
 
 (defun next-name* (name symtable)
+  (error "~@<Not yet re-implemented.~:@>")
+  #+nil
   (mapcar (rcurry #'intree:tree-right (symtable-store symtable))
           (addr* symtable name)))
 
-(defun next-name (name symtable)
-  (intree:tree-right (addr symtable name) (symtable-store symtable)))
+(defun next-name (name symtable &aux (store (symtable-store symtable)))
+  (car (cl-containers:find-successor-node store (cons (+ 2 (addr symtable name)) nil))))
 
 (defun next-addr (addr symtable)
-  (intree:tree-right addr (symtable-store symtable)))
+  (car (cl-containers:find-successor-node store (cons (+ 2 addr) nil))))
 
 (defun load-system-map (filename &key (name :kernel) (nickname :k) reuse-package imbue-symbols)
   (when (and (or (find-package name) (find-package nickname)) (null reuse-package))
